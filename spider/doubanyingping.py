@@ -12,10 +12,14 @@ import matplotlib.pyplot as plt
 from urllib import request
 from bs4 import BeautifulSoup as bs
 
+from os import path
+
+from PIL import Image
+
 import matplotlib
 
 matplotlib.rcParams['figure.figsize'] = (10.0, 5.0)
-from wordcloud import WordCloud  # 词云包
+from wordcloud import WordCloud ,ImageColorGenerator # 词云包
 
 
 # 分析网页函数
@@ -55,6 +59,8 @@ def getCommentsById(movieId, pageNum):
 
 
 def main():
+    d = path.dirname(__file__)
+    alice_coloring = numpy.array(Image.open(path.join(d, 'F:\python\WebSpider\ee.jpg')))
     # 循环获取第一个电影的前10页评论
     commentList = []
     NowPlayingMovie_list = getNowPlayingMovie_list()
@@ -87,16 +93,24 @@ def main():
     words_stat = words_stat.reset_index().sort_values(by=["计数"], ascending=False)
 
     # 用词云进行显示
-    wordcloud = WordCloud(font_path="F:\python\WebSpider\simhei.ttf", background_color="white", max_font_size=80)
+    wordcloud = WordCloud(font_path="F:\python\WebSpider\simhei.ttf", background_color="white",mask=alice_coloring, max_font_size=80)
     word_frequence = {x[0]: x[1] for x in words_stat.head(1000).values}
 
     # word_frequence_list = []
     # for key in word_frequence:
     #     temp = (key,word_frequence[key])
     #     word_frequence_list.append(temp)
+    # create coloring from image
+    image_colors = ImageColorGenerator(alice_coloring)
+
 
     wordcloud = wordcloud.fit_words(word_frequence)
-    plt.imshow(wordcloud)
+    # 通过这种方式词云将会按照给定的图片颜色布局生成字体颜色策略
+    # plt.imshow(wordcloud.recolor(color_func=image_colors), interpolation='bilinear')
+    # plt.imshow(alice_coloring, cmap=plt.cm.gray, interpolation="bilinear")
+    # show
+    # 在只设置mask的情况下，你将会得到一个拥有图片形状的词云
+    plt.imshow(wordcloud, interpolation='bilinear')
     plt.axis("off")
     plt.show()
 
